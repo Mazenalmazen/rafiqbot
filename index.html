@@ -12,7 +12,7 @@
             --hint-color: var(--tg-theme-hint-color, #999999);
             --border-color: #e0e0e0;
             --primary-color: #1ca185;
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5); /* لون متوافق مع الوضع الليلي */
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
             --button-bg: var(--tg-theme-button-color, #1ca185);
             --button-text: var(--tg-theme-button-text-color, #ffffff);
         }
@@ -31,38 +31,14 @@
         .btn { background: var(--button-bg); color: var(--button-text); border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
         .btn-outline { background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); }
         
-        /* تنسيقات متوافقة مع الوضع الليلي */
-        .symbols-toggle-btn { 
-            background: var(--secondary-bg); 
-            border: 1px solid var(--border-color); 
-            padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 10px; 
-            font-weight: bold; cursor: pointer; color: var(--text-color); 
-        }
-        .symbols-panel { 
-            display: none; flex-wrap: wrap; gap: 8px; 
-            background: var(--secondary-bg); 
-            padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); 
-            margin-bottom: 10px; max-height: 120px; overflow-y: auto; direction: ltr; 
-        }
-        .symbol-item { 
-            background: var(--bg-color); 
-            color: var(--text-color); 
-            border: 1px solid var(--border-color); 
-            padding: 6px 10px; border-radius: 5px; font-size: 18px; cursor: pointer; user-select: none; 
-        }
+        .symbols-toggle-btn { background: var(--secondary-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 10px; font-weight: bold; cursor: pointer; color: var(--text-color); }
+        .symbols-panel { display: none; flex-wrap: wrap; gap: 8px; background: var(--secondary-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px; max-height: 120px; overflow-y: auto; direction: ltr; }
+        .symbol-item { background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 5px; font-size: 18px; cursor: pointer; user-select: none; }
         
         .submit-btn { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #28a745; color: white; border: none; padding: 15px; border-radius: 25px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); }
         
         .question-list { margin-top: 10px; }
-        .q-item { 
-            background: var(--secondary-bg); 
-            color: var(--text-color); 
-            padding: 10px; border-radius: 8px; margin-bottom: 5px; border-right: 4px solid var(--primary-color); font-size: 14px; 
-        }
-        #previewPanel {
-            background: var(--bg-color); 
-            color: var(--text-color);
-        }
+        .q-item { background: var(--secondary-bg); color: var(--text-color); padding: 10px; border-radius: 8px; margin-bottom: 5px; border-right: 4px solid var(--primary-color); font-size: 14px; }
     </style>
 </head>
 <body>
@@ -78,9 +54,8 @@
         
         <button type="button" class="symbols-toggle-btn" onclick="toggleSymbols()">🔣 إظهار/إخفاء الرموز العلمية</button>
         <div id="symbolsPanel" class="symbols-panel"></div>
-        <div id="previewPanel" style="display:none; border:1px dashed #1ca185; padding:10px; border-radius:8px; margin-bottom:10px;"></div>
 
-        <textarea id="qText" placeholder="نص السؤال..." rows="2" oninput="handleInput(this)"></textarea>
+        <textarea id="qText" placeholder="نص السؤال..." rows="2"></textarea>
         
         <div id="optionsContainer" style="margin-top:10px;"></div>
         <button class="btn-outline btn" onclick="addOption()">+ إضافة خيار</button>
@@ -123,14 +98,7 @@
 
         function toggleSymbols() {
             const panel = document.getElementById('symbolsPanel');
-            const preview = document.getElementById('previewPanel');
-            if (panel.style.display === 'none' || panel.style.display === '') {
-                panel.style.display = 'flex';
-                preview.style.display = 'block';
-            } else {
-                panel.style.display = 'none';
-                preview.style.display = 'none';
-            }
+            panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'flex' : 'none';
         }
 
         function insertSymbol(symbol) {
@@ -142,14 +110,6 @@
             activeInput.focus();
         }
 
-        function handleInput(el) {
-            el.style.height = 'auto';
-            el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-            if(document.getElementById('previewPanel').style.display === 'block') {
-                 document.getElementById('previewPanel').innerText = el.value || "المعاينة...";
-            }
-        }
-
         function renderOptions() {
             const container = document.getElementById('optionsContainer');
             container.innerHTML = "";
@@ -158,7 +118,7 @@
                 div.className = 'option-row';
                 div.innerHTML = `
                     <input type="radio" name="correctOpt" value="${index}" ${index === 0 ? 'checked' : ''}>
-                    <input type="text" id="opt_${index}" placeholder="الخيار ${index + 1}" value="${opt}" oninput="updateOption(${index}, this.value)">
+                    <input type="text" placeholder="الخيار ${index + 1}" value="${opt}" oninput="updateOption(${index}, this.value)">
                 `;
                 container.appendChild(div);
             });
