@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ربط حساب المعلم</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 20px; text-align: center; background: #fff; color: #000; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 16px; text-align: right; }
+        button { width: 100%; padding: 15px; background: #1ca185; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
+        .btn-secondary { background: #ff9800; }
+    </style>
+</head>
+<body>
+    <div id="loading" style="margin-top: 50px;">⏳ جاري التعرف على حسابك...</div>
+    
+    <div id="manualInput" style="display:none;">
+        <h2>🔗 ربط الحساب</h2>
+        <p style="color: #64748b; font-size: 14px;">لم نتمكن من قراءة بريدك تلقائياً، يرجى إدخاله:</p>
+        <input type="email" id="email" placeholder="البريد الإلكتروني" />
+        <button onclick="linkAccount()">ربط الحساب بالبوت</button>
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
+        <p style="color: #64748b; font-size: 14px;">ليس لديك حساب؟</p>
+        <button class="btn-secondary" onclick="tg.openLink('https://nahgalawelclass.great-site.net/')">📝 التسجيل في المنصة أولاً</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        window.onload = () => {
+            let savedEmail = localStorage.getItem('teacher_email') || localStorage.getItem('email') || localStorage.getItem('user_email') || localStorage.getItem('loginEmail');
+            
+            if (savedEmail && savedEmail.includes('@')) {
+                document.getElementById('loading').innerText = "✅ تم التعرف على بريدك. جاري الربط...";
+                linkAccount(savedEmail);
+            } else {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('manualInput').style.display = 'block';
+            }
+        };
+
+        function linkAccount(autoEmail = null) {
+            const email = autoEmail || document.getElementById('email').value.trim();
+            if (!email || !email.includes('@')) return alert("الرجاء إدخال بريد صحيح");
+            
+            tg.sendData(JSON.stringify({ action: "link_teacher", email: email }));
+            tg.close();
+        }
+    </script>
+</body>
+</html>

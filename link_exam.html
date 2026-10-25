@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ربط اختبار بالفصل</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 20px; text-align: center; background: #fff; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 16px; text-align: right; }
+        button { width: 100%; padding: 15px; background: #1ca185; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .status { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>🔗 ربط اختبار بالفصل</h2>
+    <input type="email" id="email" placeholder="البريد الإلكتروني" />
+    <input type="text" id="exam_number" placeholder="رقم الاختبار (6 أرقام)" />
+    <button onclick="linkExam()">ربط الاختبار</button>
+    <div id="status" class="status"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const classCode = urlParams.get('class');
+        
+        let savedEmail = localStorage.getItem('teacher_email') || localStorage.getItem('email');
+        if (savedEmail) document.getElementById('email').value = savedEmail;
+
+        // ⚠️ ضع مفاتيح سوباباس هنا (الخاصة بالموقع)
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+        async function linkExam() {
+            const email = document.getElementById('email').value.trim();
+            const examNum = document.getElementById('exam_number').value.trim();
+            const status = document.getElementById('status');
+
+            if (!email || !examNum) {
+                status.style.color = 'red';
+                status.innerText = "أدخل البريد ورقم الاختبار";
+                return;
+            }
+
+            status.style.color = 'blue';
+            status.innerText = "⏳ جاري التحقق...";
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/exams?exam_number=eq.${examNum}&select=exam_name,teacher_email`, {
+                    headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+                });
+                const data = await res.json();
+
+                if (!data || data.length === 0) {
+                    status.style.color = 'red';
+                    status.innerText = "❌ هذا الاختبار غير موجود";
+                    return;
+                }
+
+                if (data[0].teacher_email.trim().toLowerCase() !== email.toLowerCase()) {
+                    status.style.color = 'red';
+                    status.innerText = "🚫 هذا الاختبار لا يخص هذا البريد";
+                    return;
+                }
+
+                status.style.color = 'green';
+                status.innerText = "✅ تم التحقق! جاري الربط...";
+                
+                tg.sendData(JSON.stringify({ action: "link_exam", exam_number: examNum, class_code: classCode }));
+                tg.close();
+
+            } catch (e) {
+                status.style.color = 'red';
+                status.innerText = "❌ خطأ في الاتصال";
+            }
+        }
+    </script>
+</body>
+</html>
